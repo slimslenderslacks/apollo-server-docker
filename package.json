@@ -3,6 +3,9 @@
     "version": "1.0.0",
     "description": "Apollo server starter project with TypeScript and Docker.",
     "main": "index.js",
+    "bin": {
+      "apollo-server-docker": "dist/index.js"
+    },
     "scripts": {
         "build": "tsc -p .",
         "dev": "ts-node-dev src/index.ts",

@@ -1,13 +1,26 @@
-FROM node:16-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN yarn install
-RUN yarn build
+# syntax = docker/dockerfile:1.4
+FROM nixos/nix:latest AS builder
 
-FROM node:16-alpine AS final
+WORKDIR /tmp/build
+RUN mkdir /tmp/nix-store-closure
+
+RUN --mount=type=cache,target=/nix,from=nixos/nix:latest,source=/nix \
+    --mount=type=cache,target=/root/.cache \
+    --mount=type=bind,target=/tmp/build <<EOF 
+  ls -l /nix/store | wc
+  nix \
+    --extra-experimental-features "nix-command flakes" \
+    --extra-substituters "http://host.docker.internal?priority=10" \
+    --option filter-syscalls false \
+    --show-trace \
+    --log-format raw \
+    build . --out-link /tmp/output/result
+  cp -R $(nix-store -qR /tmp/output/result) /tmp/nix-store-closure
+EOF
+
+FROM scratch
+
 WORKDIR /app
-COPY --from=builder ./app/dist ./dist
-COPY package.json .
-COPY yarn.lock .
-RUN yarn install --production
-CMD [ "yarn", "start" ]
+
+COPY --from=builder /tmp/nix-store-closure /nix/store
+COPY --from=builder /tmp/output/ /app/
