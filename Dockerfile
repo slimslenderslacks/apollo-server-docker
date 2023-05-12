@@ -4,9 +4,11 @@ FROM nixos/nix:latest AS builder
 WORKDIR /tmp/build
 RUN mkdir /tmp/nix-store-closure
 
-RUN --mount=type=cache,target=/nix,from=nixos/nix:latest,source=/nix \
+RUN \
+    --mount=type=cache,target=/nix,from=nixos/nix:latest,source=/nix \
     --mount=type=cache,target=/root/.cache \
-    --mount=type=bind,target=/tmp/build <<EOF 
+    --mount=type=bind,target=/tmp/build \
+    <<EOF 
   ls -l /nix/store | wc
   nix \
     --extra-experimental-features "nix-command flakes" \
@@ -24,3 +26,4 @@ WORKDIR /app
 
 COPY --from=builder /tmp/nix-store-closure /nix/store
 COPY --from=builder /tmp/output/ /app/
+ENTRYPOINT ["/app/result/bin/app"]
