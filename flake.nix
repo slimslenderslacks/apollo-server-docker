@@ -45,7 +45,7 @@
         };
       in
       with pkgs; {
-        packages.default = writeShellScriptBin "app" ''
+        packages.default = writeShellScriptBin "entrypoint" ''
 	  ${nodejs}/bin/node ${app}/bin/apollo-server
 	'';
         devShells.default = mkShell { buildInputs = [ nodejs node2nix ]; };
