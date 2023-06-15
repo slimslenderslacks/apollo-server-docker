@@ -1,6 +1,6 @@
 # This file originates from node2nix
 
-{lib, stdenv, nodejs, python2, pkgs, libtool, runCommand, writeTextFile, writeShellScript}:
+{lib, stdenv, nodejs, nodejs-slim, python2, pkgs, libtool, runCommand, writeTextFile, writeShellScript}:
 
 let
   # Workaround to cope with utillinux in Nixpkgs 20.09 and util-linux in Nixpkgs master
@@ -637,6 +637,77 @@ let
         '';
       } // extraArgs);
 
+  # Builds a node environment (a node_modules folder without binaries)
+  buildNodeDependenciesWithoutBinaries =
+    { name
+    , packageName
+    , version ? null
+    , src
+    , dependencies ? []
+    , buildInputs ? []
+    , production ? true
+    , npmFlags ? ""
+    , dontNpmInstall ? false
+    , bypassCache ? false
+    , reconstructLock ? false
+    , dontStrip ? true
+    , unpackPhase ? "true"
+    , buildPhase ? "true"
+    , ... }@args:
+
+    let
+      extraArgs = removeAttrs args [ "name" "dependencies" "buildInputs" ];
+    in
+      stdenv.mkDerivation ({
+        name = "node-dependencies-${name}${if version == null then "" else "-${version}"}";
+
+        buildInputs = [ tarWrapper python nodejs ]
+          ++ lib.optional (stdenv.isLinux) utillinux
+          ++ lib.optional (stdenv.isDarwin) libtool
+          ++ buildInputs;
+
+        inherit dontStrip; # Stripping may fail a build for some package deployments
+        inherit dontNpmInstall unpackPhase buildPhase;
+
+        includeScript = includeDependencies { inherit dependencies; };
+        pinpointDependenciesScript = pinpointDependenciesOfPackage args;
+
+        passAsFile = [ "includeScript" "pinpointDependenciesScript" ];
+
+        installPhase = ''
+          source ${installPackage}
+
+          mkdir -p $out/${packageName}
+          cd $out/${packageName}
+
+          source $includeScriptPath
+
+          # Create fake package.json to make the npm commands work properly
+          cp ${src}/package.json .
+          chmod 644 package.json
+          ${lib.optionalString bypassCache ''
+            if [ -f ${src}/package-lock.json ]
+            then
+                cp ${src}/package-lock.json .
+                chmod 644 package-lock.json
+            fi
+          ''}
+
+          # Go to the parent folder to make sure that all packages are pinpointed
+          cd ..
+          ${lib.optionalString (builtins.substring 0 1 packageName == "@") "cd .."}
+
+          ${prepareAndInvokeNPM { inherit packageName bypassCache reconstructLock npmFlags production; }}
+
+          # Expose the executables that were installed
+          cd ..
+          ${lib.optionalString (builtins.substring 0 1 packageName == "@") "cd .."}
+
+          mv ${packageName} lib
+          rm -fr $out/lib/node_modules/.bin
+        '';
+      } // extraArgs);
+
   # Builds a development shell
   buildNodeShell =
     { name
@@ -686,4 +757,5 @@ in
   buildNodePackage = lib.makeOverridable buildNodePackage;
   buildNodeDependencies = lib.makeOverridable buildNodeDependencies;
   buildNodeShell = lib.makeOverridable buildNodeShell;
+  buildNodeDependenciesWithoutBinaries = lib.makeOverridable buildNodeDependenciesWithoutBinaries;
 }

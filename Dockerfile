@@ -15,7 +15,7 @@ RUN \
     --extra-substituters "http://host.docker.internal?priority=10" \
     --option filter-syscalls false \
     --show-trace \
-    --log-format raw \
+    --log-format bar-with-logs \
     build . --out-link /tmp/output/result
   cp -R $(nix-store -qR /tmp/output/result) /tmp/nix-store-closure
 EOF
