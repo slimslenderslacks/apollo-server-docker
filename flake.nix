@@ -4,7 +4,11 @@
     platform-engineering.url = "./remote";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
-  outputs = { self, nixpkgs, remote, ... }:
-    (platform-engineering.node-project {inherit nixpkgs;});
+  outputs = { nixpkgs, ... }@inputs:
+    inputs.platform-engineering.node-project
+      {
+        inherit nixpkgs;
+        dir = ./.;
+      };
 }
 

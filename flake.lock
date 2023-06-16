@@ -3,7 +3,7 @@
     "devshell": {
       "inputs": {
         "nixpkgs": [
-          "remote",
+          "platform-engineering",
           "nixpkgs"
         ],
         "systems": "systems"
@@ -43,7 +43,7 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
-          "remote",
+          "platform-engineering",
           "nixpkgs"
         ]
       },
@@ -93,7 +93,7 @@
         "type": "github"
       }
     },
-    "remote": {
+    "platform-engineering": {
       "inputs": {
         "devshell": "devshell",
         "flake-utils": "flake-utils",
@@ -102,19 +102,19 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-+HLaINIs1TiRG6DEmT5HnvEqJc7DCLCoCpyUnX+B2Ys=",
-        "path": "/nix/store/hnd0pa9dai2sv254bvzzizr4ldbx8lxh-source/remote",
+        "narHash": "sha256-G4cDxLATqr2N6G50Rw+xVIQc4KJBaaSplvbwAAspc1o=",
+        "path": "/nix/store/78sr6nrj1yiyxmnmg374rib7xqjf11bn-source/remote",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/hnd0pa9dai2sv254bvzzizr4ldbx8lxh-source/remote",
+        "path": "/nix/store/78sr6nrj1yiyxmnmg374rib7xqjf11bn-source/remote",
         "type": "path"
       }
     },
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "remote": "remote"
+        "platform-engineering": "platform-engineering"
       }
     },
     "systems": {

@@ -15,7 +15,7 @@
   outputs = { self, flake-utils, devshell, gitignore, ... }:
     {
       node-project =
-        { nixpkgs }:
+        { nixpkgs, dir }:
         flake-utils.lib.eachDefaultSystem (system:
         let
           pkgs = import nixpkgs {
@@ -25,7 +25,7 @@
             ];
           };
           nodejs = pkgs.nodejs;
-          node2nixOutput = import ./default.nix { inherit pkgs nodejs system; };
+          node2nixOutput = import (dir + /default.nix) { inherit pkgs nodejs system; };
 
           # NOTE: may want to try https://github.com/svanderburg/node2nix/issues/301 to limit rebuilds
           nodeDeps = node2nixOutput.development.nodeDependencies;
@@ -33,7 +33,7 @@
           app = pkgs.stdenv.mkDerivation {
             name = "example-ts-node";
             version = "0.1.0";
-            src = gitignore.lib.gitignoreSource ./.;
+            src = gitignore.lib.gitignoreSource dir;
             buildInputs = [ nodejs ];
             buildPhase = ''
               runHook preBuild
