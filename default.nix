@@ -8,23 +8,10 @@ let
   nodeEnv = import ./node-env.nix {
     inherit (pkgs) stdenv lib python2 runCommand writeTextFile writeShellScript;
     inherit pkgs nodejs;
-    nodejs-slim = pkgs.nodejs-slim;
-    libtool = if pkgs.stdenv.isDarwin then pkgs.darwin.cctools else null;
-  };
-  nodeEnv-production = import ./node-env.nix {
-    inherit (pkgs) stdenv lib python2 runCommand writeTextFile writeShellScript;
-    inherit pkgs nodejs;
-    nodejs-slim = pkgs.nodejs-slim;
     libtool = if pkgs.stdenv.isDarwin then pkgs.darwin.cctools else null;
   };
 in
-{
-  development = import ./node-packages.nix {
-    inherit (pkgs) fetchurl nix-gitignore stdenv lib fetchgit;
-    inherit nodeEnv;
-  };
-  production = import ./production-node-packages.nix {
-    inherit (pkgs) fetchurl nix-gitignore stdenv lib fetchgit;
-    nodeEnv = nodeEnv;
-  };
+import ./node-packages.nix {
+  inherit (pkgs) fetchurl nix-gitignore stdenv lib fetchgit;
+  inherit nodeEnv;
 }

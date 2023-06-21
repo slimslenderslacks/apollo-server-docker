@@ -8,8 +8,7 @@ RUN \
     --mount=type=cache,target=/nix,from=nixos/nix:latest,source=/nix \
     --mount=type=cache,target=/root/.cache \
     --mount=type=bind,target=/tmp/build \
-    <<EOF 
-  ls -l /nix/store | wc
+    <<EOF
   nix \
     --extra-experimental-features "nix-command flakes" \
     --extra-substituters "http://host.docker.internal?priority=10" \
