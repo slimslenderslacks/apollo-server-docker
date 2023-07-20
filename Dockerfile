@@ -17,6 +17,10 @@ RUN \
     --log-format bar-with-logs \
     build . --out-link /tmp/output/result
   cp -R $(nix-store -qR /tmp/output/result) /tmp/nix-store-closure
+  cd /tmp/output
+  nix \
+    --extra-experimental-features "nix-command flakes" \
+    run github:tiiuae/sbomnix#sbomnix -- /tmp/output/result/bin/entrypoint
 EOF
 
 FROM scratch
@@ -25,4 +29,5 @@ WORKDIR /app
 
 COPY --from=builder /tmp/nix-store-closure /nix/store
 COPY --from=builder /tmp/output/ /app/
+COPY --from=builder /tmp/output/sbom.spdx.json .
 ENTRYPOINT ["/app/result/bin/entrypoint"]
